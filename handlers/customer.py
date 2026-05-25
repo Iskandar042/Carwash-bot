@@ -1,24 +1,55 @@
 """
 Customer flow: car owner enters their plate number and sees
 queue position, estimated wait time, and payment status.
+
+After showing the status card an inline [🔄 Refresh] button
+lets them update the card without re-entering the plate.
 """
 import re
 from telegram import Update
 from telegram.ext import (
-    ContextTypes, ConversationHandler, MessageHandler, filters,
+    ContextTypes, ConversationHandler,
+    MessageHandler, CallbackQueryHandler, filters,
 )
 
 import db
 from lang import t, wf_label, pay_label
 from config import service_name
-from keyboards import main_menu
+from keyboards import main_menu, staff_menu, check_again_keyboard
+from utils import _lang, _is_staff
 
 # ── State ─────────────────────────────────────────────────────────────────────
 CUSTOMER_PLATE = 10
 
 
-def _lang(ctx: ContextTypes.DEFAULT_TYPE) -> str:
-    return ctx.user_data.get("lang", "ru")
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _build_status_text(booking: dict, queue: list[dict], lang: str) -> str:
+    """Build the full status-card text for a booking."""
+    pos  = db.queue_position(queue, booking["id"])
+    wait = db.estimate_wait_minutes(queue, booking["id"])
+    wf   = wf_label(booking.get("workflow_status", "queue"), lang)
+    pay  = pay_label(booking.get("payment_status",  "not-paid"), lang)
+    svc  = service_name(booking.get("service", ""), lang)
+
+    wf_status = booking.get("workflow_status", "queue")
+    if wf_status == "queue":
+        pos_text = t("status_in_queue", lang, pos=pos, total=len(queue), wait=wait)
+    elif wf_status == "washing":
+        pos_text = t("status_washing", lang)
+    else:
+        pos_text = t("status_done", lang)
+
+    amount_fmt = f"{booking.get('amount', 0):,}".replace(",", " ")
+
+    return t(
+        "status_card", lang,
+        plate=booking["plate"],
+        pos_text=pos_text,
+        wf=wf, pay=pay,
+        service=svc,
+        amount=amount_fmt,
+    )
 
 
 # ── Entry ─────────────────────────────────────────────────────────────────────
@@ -40,7 +71,7 @@ async def receive_plate(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text(
             t("plate_invalid", lang), parse_mode="HTML"
         )
-        return CUSTOMER_PLATE   # stay in same state, ask again
+        return CUSTOMER_PLATE   # ask again
 
     booking = await db.get_booking_by_plate(plate)
 
@@ -48,48 +79,64 @@ async def receive_plate(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text(
             t("plate_not_found", lang, plate=plate),
             parse_mode="HTML",
-            reply_markup=main_menu(lang),
+            reply_markup=_home_markup(ctx, lang),
         )
         return ConversationHandler.END
 
-    queue  = await db.get_active_queue()
-    pos    = db.queue_position(queue, booking["id"])
-    wait   = db.estimate_wait_minutes(queue, booking["id"])
-    wf     = wf_label(booking.get("workflow_status", "queue"), lang)
-    pay    = pay_label(booking.get("payment_status",  "not-paid"), lang)
-    svc    = service_name(booking.get("service", ""), lang)
-
-    wf_status = booking.get("workflow_status", "queue")
-    if wf_status == "queue":
-        pos_text = t("status_in_queue", lang, pos=pos, total=len(queue), wait=wait)
-    elif wf_status == "washing":
-        pos_text = t("status_washing", lang)
-    else:
-        pos_text = t("status_done", lang)
-
-    amount_fmt = f"{booking.get('amount', 0):,}".replace(",", " ")
-
-    text = t(
-        "status_card", lang,
-        plate=booking["plate"],
-        pos_text=pos_text,
-        wf=wf, pay=pay,
-        service=svc,
-        amount=amount_fmt,
-    )
+    queue = await db.get_active_queue()
+    text  = _build_status_text(booking, queue, lang)
 
     await update.message.reply_text(
-        text, parse_mode="HTML", reply_markup=main_menu(lang)
+        text,
+        parse_mode="HTML",
+        reply_markup=check_again_keyboard(booking["plate"], lang),
     )
     return ConversationHandler.END
+
+
+# ── Inline refresh — re-query and edit the status card ───────────────────────
+
+async def refresh_plate_status(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
+    """Global callback — not inside a ConversationHandler."""
+    query = update.callback_query
+    await query.answer(cache_time=0)
+    lang  = _lang(ctx)
+    plate = query.data.split(":", 1)[1]
+
+    booking = await db.get_booking_by_plate(plate)
+    if not booking:
+        await query.edit_message_text(
+            t("plate_not_found", lang, plate=plate),
+            parse_mode="HTML",
+        )
+        return
+
+    queue = await db.get_active_queue()
+    text  = _build_status_text(booking, queue, lang)
+
+    await query.edit_message_text(
+        text,
+        parse_mode="HTML",
+        reply_markup=check_again_keyboard(booking["plate"], lang),
+    )
 
 
 # ── Fallback ──────────────────────────────────────────────────────────────────
 
 async def cancel(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> int:
     lang = _lang(ctx)
-    await update.message.reply_text(t("cancelled", lang), reply_markup=main_menu(lang))
+    await update.message.reply_text(
+        t("cancelled", lang),
+        reply_markup=_home_markup(ctx, lang),
+    )
     return ConversationHandler.END
+
+
+# ── Internal helpers ──────────────────────────────────────────────────────────
+
+def _home_markup(ctx: ContextTypes.DEFAULT_TYPE, lang: str):
+    """Return the correct menu depending on whether user is staff."""
+    return staff_menu(lang) if _is_staff(ctx) else main_menu(lang)
 
 
 # ── Plate normaliser ──────────────────────────────────────────────────────────
