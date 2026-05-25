@@ -73,7 +73,7 @@ async def handle_lang(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Send the appropriate ReplyKeyboard
     markup = staff_menu(lang) if _is_staff(ctx) else main_menu(lang)
-    await query.message.reply_text("👇", reply_markup=markup)
+    await query.message.reply_text("^👇", reply_markup=markup)
 
 
 # ── /help ─────────────────────────────────────────────────────────────────────
@@ -128,10 +128,10 @@ def main() -> None:
 
     # ── Navigation buttons (simple message handlers, no conversation state) ───
     # These must be registered BEFORE ConversationHandlers so they always fire.
-    app.add_handler(MessageHandler(filters.Regex("🏠"), go_home))
-    app.add_handler(MessageHandler(filters.Regex("🌐"), change_lang_btn))
-    app.add_handler(MessageHandler(filters.Regex("🚪"), staff_logout))
-    app.add_handler(MessageHandler(filters.Regex("📋"), view_queue))
+    app.add_handler(MessageHandler(filters.Regex("^🏠"), go_home))
+    app.add_handler(MessageHandler(filters.Regex("^🌐"), change_lang_btn))
+    app.add_handler(MessageHandler(filters.Regex("^🚪"), staff_logout))
+    app.add_handler(MessageHandler(filters.Regex("^📋"), view_queue))
 
     # ── Staff conversation handlers ───────────────────────────────────────────
     for h in staff_handlers():
