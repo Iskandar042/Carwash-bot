@@ -127,7 +127,7 @@ def normalize_plate(raw: str) -> str:
 def build_handler() -> ConversationHandler:
     return ConversationHandler(
         entry_points=[
-            MessageHandler(filters.Regex("🚗"), start_check),
+            MessageHandler(filters.Regex("^🚗"), start_check),
         ],
         states={
             CUSTOMER_PLATE: [
@@ -135,7 +135,7 @@ def build_handler() -> ConversationHandler:
             ],
         },
         fallbacks=[
-            MessageHandler(filters.Regex("🏠"), cancel),
+            MessageHandler(filters.Regex("^🏠"), cancel),
             MessageHandler(filters.COMMAND, cancel),
         ],
         name="customer_check",
