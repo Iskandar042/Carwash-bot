@@ -16,11 +16,11 @@ from telegram.ext import (
 from config import BOT_TOKEN
 from lang import t
 from keyboards import main_menu, staff_menu, lang_keyboard
-from handlers.customer import build_handler as customer_handler
+from utils import _lang, _is_staff
+from handlers.customer import build_handler as customer_handler, refresh_plate_status
 from handlers.staff import (
     build_handlers as staff_handlers,
     staff_logout, view_queue,
-    _is_staff,
 )
 
 logging.basicConfig(
@@ -28,12 +28,6 @@ logging.basicConfig(
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
-
-
-# ── Language helpers ──────────────────────────────────────────────────────────
-
-def _lang(ctx: ContextTypes.DEFAULT_TYPE) -> str:
-    return ctx.user_data.get("lang", "ru")
 
 
 # ── /start — show language picker ─────────────────────────────────────────────
@@ -65,15 +59,20 @@ async def handle_lang(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
     name = update.effective_user.first_name or ("друг" if lang == "ru" else "do'st")
 
-    # Update the language-picker message to a welcome message
-    await query.edit_message_text(
-        t("welcome", lang, name=name),
-        parse_mode="HTML",
-    )
+    # Delete the inline language-picker message, then send one clean message
+    # with the welcome text and the correct ReplyKeyboard attached.
+    try:
+        await query.message.delete()
+    except Exception:
+        pass
 
-    # Send the appropriate ReplyKeyboard
     markup = staff_menu(lang) if _is_staff(ctx) else main_menu(lang)
-    await query.message.reply_text("^👇", reply_markup=markup)
+    await ctx.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=t("welcome", lang, name=name),
+        parse_mode="HTML",
+        reply_markup=markup,
+    )
 
 
 # ── /help ─────────────────────────────────────────────────────────────────────
@@ -126,8 +125,10 @@ def main() -> None:
     # ── Language selection callback ───────────────────────────────────────────
     app.add_handler(CallbackQueryHandler(handle_lang, pattern="^lang:"))
 
-    # ── Navigation buttons (simple message handlers, no conversation state) ───
-    # These must be registered BEFORE ConversationHandlers so they always fire.
+    # ── Inline refresh for customer status cards (global, outside any conv) ──
+    app.add_handler(CallbackQueryHandler(refresh_plate_status, pattern="^refresh_plate:"))
+
+    # ── Navigation buttons (registered BEFORE ConversationHandlers) ───────────
     app.add_handler(MessageHandler(filters.Regex("^🏠"), go_home))
     app.add_handler(MessageHandler(filters.Regex("^🌐"), change_lang_btn))
     app.add_handler(MessageHandler(filters.Regex("^🚪"), staff_logout))
