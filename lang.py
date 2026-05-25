@@ -28,6 +28,9 @@ _S: dict[str, dict[str, str]] = {
         "btn_cancel":       "❌ Отмена",
         "btn_cash":         "💵 Наличные",
         "btn_card":         "💳 Карта",
+        "btn_paid_now":     "✅ Уже оплачено",
+        "btn_pay_later":    "⏳ Оплатит позже",
+        "btn_check_again":  "🔄 Проверить снова",
         "lang_name":        "🇷🇺 Русский",
         # ── System ────────────────────────────────────────────────────────────
         "select_lang": "🌐 Выберите язык / Tilni tanlang:",
@@ -47,8 +50,11 @@ _S: dict[str, dict[str, str]] = {
         ),
         # ── Customer flow ─────────────────────────────────────────────────────
         "ask_plate": (
-            "🔍 Введите гос. номер вашего автомобиля.\n"
-            "Пример: <code>01 A 123 AA</code>"
+            "🔍 <b>Введите гос. номер</b> вашего автомобиля.\n\n"
+            "Допустимые форматы:\n"
+            "  • <code>01 A 123 AA</code>\n"
+            "  • <code>01A123AA</code>\n"
+            "  • <code>01|A 123 AA</code>"
         ),
         "plate_invalid": (
             "⚠️ Неверный формат номера. Попробуйте ещё раз.\n"
@@ -85,13 +91,15 @@ _S: dict[str, dict[str, str]] = {
         ),
         "ask_service":    "Номер: <b>{plate}</b>\n\nВыберите услугу:",
         "ask_pay_type":   "Услуга: <b>{service}</b>  ·  <b>{price} сум</b>\n\nСпособ оплаты:",
+        "ask_pay_status": "Способ: <b>{pay_type}</b>\n\nСтатус оплаты — клиент уже оплатил?",
         "returning_client": "⭐ Постоянный клиент: {tier}  ·  {visits} визит(ов)",
         "confirm_booking": (
             "📋 <b>Подтверждение записи</b>\n\n"
-            "🚗 Номер:  <b>{plate}</b>\n"
-            "🧼 Услуга: {service}\n"
-            "💰 Сумма:  {price} сум\n"
-            "💳 Оплата: {pay_type}"
+            "🚗 Номер:   <b>{plate}</b>\n"
+            "🧼 Услуга:  {service}\n"
+            "💰 Сумма:   {price} сум\n"
+            "💳 Способ:  {pay_type}\n"
+            "📊 Оплата:  {pay_status}"
         ),
         "booking_saved": (
             "✅ <b>{plate}</b> добавлен в очередь.\n"
@@ -137,6 +145,9 @@ _S: dict[str, dict[str, str]] = {
         "btn_cancel":       "❌ Bekor qilish",
         "btn_cash":         "💵 Naqd",
         "btn_card":         "💳 Karta",
+        "btn_paid_now":     "✅ Allaqachon to'landi",
+        "btn_pay_later":    "⏳ Keyinroq to'laydi",
+        "btn_check_again":  "🔄 Qayta tekshirish",
         "lang_name":        "🇺🇿 O'zbekcha",
         # ── System ────────────────────────────────────────────────────────────
         "select_lang": "🌐 Выберите язык / Tilni tanlang:",
@@ -156,8 +167,11 @@ _S: dict[str, dict[str, str]] = {
         ),
         # ── Customer flow ─────────────────────────────────────────────────────
         "ask_plate": (
-            "🔍 Avtomobilingizning davlat raqamini kiriting.\n"
-            "Misol: <code>01 A 123 AA</code>"
+            "🔍 <b>Davlat raqamini kiriting</b>.\n\n"
+            "Qabul qilinadigan formatlar:\n"
+            "  • <code>01 A 123 AA</code>\n"
+            "  • <code>01A123AA</code>\n"
+            "  • <code>01|A 123 AA</code>"
         ),
         "plate_invalid": (
             "⚠️ Noto'g'ri raqam formati. Qayta urinib ko'ring.\n"
@@ -194,13 +208,15 @@ _S: dict[str, dict[str, str]] = {
         ),
         "ask_service":    "Raqam: <b>{plate}</b>\n\nXizmatni tanlang:",
         "ask_pay_type":   "Xizmat: <b>{service}</b>  ·  <b>{price} so'm</b>\n\nTo'lov turini tanlang:",
+        "ask_pay_status": "Tur: <b>{pay_type}</b>\n\nTo'lov holati — mijoz allaqachon to'ladimi?",
         "returning_client": "⭐ Doimiy mijoz: {tier}  ·  {visits} tashrif",
         "confirm_booking": (
             "📋 <b>Yozuvni tasdiqlash</b>\n\n"
-            "🚗 Raqam:   <b>{plate}</b>\n"
-            "🧼 Xizmat:  {service}\n"
-            "💰 Summa:   {price} so'm\n"
-            "💳 To'lov:  {pay_type}"
+            "🚗 Raqam:    <b>{plate}</b>\n"
+            "🧼 Xizmat:   {service}\n"
+            "💰 Summa:    {price} so'm\n"
+            "💳 Tur:      {pay_type}\n"
+            "📊 To'lov:   {pay_status}"
         ),
         "booking_saved": (
             "✅ <b>{plate}</b> navbatga qo'shildi.\n"
