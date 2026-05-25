@@ -153,7 +153,7 @@ async def add_car_plate(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> int:
         if lr and lr.get("visits", 0) > 0:
             loyalty_note = "\n\n" + t(
                 "returning_client", lang,
-                tier=lr.get("tier", "🥉 Bronze"),
+                tier=lr.get("tier", "^🥉 Bronze"),
                 visits=lr["visits"],
             )
     except Exception:
@@ -433,13 +433,13 @@ async def nav_fallback(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> int:
 
 def build_handlers() -> list:
     _fallbacks = [
-        MessageHandler(filters.Regex("🏠"), nav_fallback),
-        MessageHandler(filters.Regex("🔄"), nav_fallback),
+        MessageHandler(filters.Regex("^🏠"), nav_fallback),
+        MessageHandler(filters.Regex("^🔄"), nav_fallback),
         MessageHandler(filters.COMMAND, nav_fallback),
     ]
 
     login_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Regex("👷"), staff_entry)],
+        entry_points=[MessageHandler(filters.Regex("^👷"), staff_entry)],
         states={
             LOGIN_PASSWORD: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, check_password),
@@ -450,7 +450,7 @@ def build_handlers() -> list:
     )
 
     add_car_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Regex("➕"), add_car_start)],
+        entry_points=[MessageHandler(filters.Regex("^➕"), add_car_start)],
         states={
             ADD_PLATE:    [MessageHandler(filters.TEXT & ~filters.COMMAND, add_car_plate)],
             ADD_SERVICE:  [CallbackQueryHandler(add_car_service)],
@@ -462,7 +462,7 @@ def build_handlers() -> list:
     )
 
     update_wf_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Regex("⚙️"), update_wf_start)],
+        entry_points=[MessageHandler(filters.Regex("^⚙️"), update_wf_start)],
         states={
             UPD_WF_SELECT: [CallbackQueryHandler(update_wf_select_car)],
             UPD_WF_STATUS: [CallbackQueryHandler(update_wf_set_status)],
@@ -472,7 +472,7 @@ def build_handlers() -> list:
     )
 
     update_pay_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Regex("💳"), update_pay_start)],
+        entry_points=[MessageHandler(filters.Regex("^💳"), update_pay_start)],
         states={
             UPD_PM_SELECT: [CallbackQueryHandler(update_pay_select_car)],
             UPD_PM_STATUS: [CallbackQueryHandler(update_pay_set_status)],
