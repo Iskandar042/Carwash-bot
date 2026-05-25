@@ -92,10 +92,17 @@ async def get_loyalty(plate: str) -> dict | None:
 
 # ── Write operations ─────────────────────────────────────────────────────────
 
-async def add_booking(plate: str, service_key: str, payment_type: str = "cash") -> str:
+async def add_booking(
+    plate: str,
+    service_key: str,
+    payment_type: str = "cash",
+    payment_status: str = "not-paid",
+) -> str:
     """
     Insert booking + payment rows, increment loyalty.
     Returns the new booking id.
+    `payment_status` is "paid" when the customer paid on the spot,
+    or "not-paid" when they'll pay later.
     """
     svc = SERVICES.get(service_key, {})
     booking_id = f"TG{int(time.time() * 1000) % 100_000_000:08d}"
@@ -111,7 +118,7 @@ async def add_booking(plate: str, service_key: str, payment_type: str = "cash") 
                 "model":           "",
                 "service":         service_key,
                 "amount":          svc.get("price", 0),
-                "payment_status":  "not-paid",
+                "payment_status":  payment_status,
                 "workflow_status": "queue",
             },
         )
@@ -125,7 +132,7 @@ async def add_booking(plate: str, service_key: str, payment_type: str = "cash") 
                 "booking_id": booking_id,
                 "plate":      plate.upper(),
                 "amount":     svc.get("price", 0),
-                "status":     "not-paid",
+                "status":     payment_status,
             },
         )
 
