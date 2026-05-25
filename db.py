@@ -17,7 +17,7 @@ def _headers() -> dict:
 
 
 def _base(table: str) -> str:
-    return f"{SUPABASE_URL}/rest/v1/{table}"
+    return f"{SUPABASE_URL}/{table}"
 
 
 # ── Queue helpers ────────────────────────────────────────────────────────────
