@@ -38,7 +38,7 @@ def staff_menu(lang: str = "ru") -> ReplyKeyboardMarkup:
             [t("btn_add_car",      lang)],
             [t("btn_update_wash",  lang), t("btn_mark_payment", lang)],
             [t("btn_view_queue",   lang)],
-            [t("btn_main_menu",    lang), t("btn_restart",      lang)],
+            [t("btn_main_menu",    lang)],
             [t("btn_logout",       lang)],
         ],
         resize_keyboard=True,
@@ -74,6 +74,31 @@ def payment_type_keyboard(lang: str = "ru") -> InlineKeyboardMarkup:
             InlineKeyboardButton(t("btn_cancel", lang), callback_data="cancel"),
         ],
     ])
+
+
+# ── Payment status choice (inline) ───────────────────────────────────────────
+
+def payment_status_choice_keyboard(lang: str = "ru") -> InlineKeyboardMarkup:
+    """Ask staff: already paid right now, or will pay later?"""
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(t("btn_paid_now",  lang), callback_data="pay_status:paid"),
+            InlineKeyboardButton(t("btn_pay_later", lang), callback_data="pay_status:not-paid"),
+        ],
+        [
+            InlineKeyboardButton(t("btn_back",   lang), callback_data="back"),
+            InlineKeyboardButton(t("btn_cancel", lang), callback_data="cancel"),
+        ],
+    ])
+
+
+# ── Check-again (inline, shown on customer status card) ───────────────────────
+
+def check_again_keyboard(plate: str, lang: str = "ru") -> InlineKeyboardMarkup:
+    """Single 'refresh' button embedded in the status card message."""
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton(t("btn_check_again", lang), callback_data=f"refresh_plate:{plate}"),
+    ]])
 
 
 # ── Confirm booking (inline) ──────────────────────────────────────────────────
