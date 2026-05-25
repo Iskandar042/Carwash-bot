@@ -103,18 +103,6 @@ async def go_home(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-# ── 🔄 Restart button ────────────────────────────────────────────────────────
-
-async def go_restart(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
-    """Clears any stale conversation data, re-shows the relevant menu."""
-    lang = _lang(ctx)
-    for key in ("new_plate", "new_service", "new_pay_type", "upd_wf_id", "upd_pm_id"):
-        ctx.user_data.pop(key, None)
-
-    markup = staff_menu(lang) if _is_staff(ctx) else main_menu(lang)
-    await update.message.reply_text(t("restarted", lang), reply_markup=markup)
-
-
 # ── 🌐 Language button (from ReplyKeyboard) ──────────────────────────────────
 
 async def change_lang_btn(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
@@ -141,7 +129,6 @@ def main() -> None:
     # ── Navigation buttons (simple message handlers, no conversation state) ───
     # These must be registered BEFORE ConversationHandlers so they always fire.
     app.add_handler(MessageHandler(filters.Regex("🏠"), go_home))
-    app.add_handler(MessageHandler(filters.Regex("🔄"), go_restart))
     app.add_handler(MessageHandler(filters.Regex("🌐"), change_lang_btn))
     app.add_handler(MessageHandler(filters.Regex("🚪"), staff_logout))
     app.add_handler(MessageHandler(filters.Regex("📋"), view_queue))
