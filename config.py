@@ -8,6 +8,9 @@ BOT_TOKEN      = os.getenv("BOT_TOKEN", "")
 #   https://xiwkqotyhcejzbeymovi.supabase.co/rest/v1
 SUPABASE_URL   = os.getenv("SUPABASE_URL", "https://xiwkqotyhcejzbeymovi.supabase.co/rest/v1")
 SUPABASE_KEY   = os.getenv("SUPABASE_KEY", "")
+# Worker Mini App URL. Opened from @leadgram_carwash_bot both as a Telegram
+# Mini App and as a plain web link. Its domain is registered to that bot.
+WORKER_APP_URL = os.getenv("WORKER_APP_URL", "https://carwash-telegram-mini-app.vercel.app")
 STAFF_PASSWORD = os.getenv("STAFF_PASSWORD", "worker123")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin1234")
 
