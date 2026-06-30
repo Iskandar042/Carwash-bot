@@ -51,16 +51,16 @@ async def cmd_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
             InlineKeyboardButton("✅ Войти / Kirish", callback_data=f"weblogin:{token}")
         ]])
         await update.message.reply_text(
-            "🔐 Вход в панель Leadgram в браузере.\n"
+            "🔐 Вход в панель AUTOWASH в браузере.\n"
             "Нажмите кнопку ниже, чтобы войти под своим аккаунтом.\n\n"
-            "Brauzerda Leadgram panelига kirish. Tasdiqlash uchun tugmani bosing.",
+            "Brauzerda AUTOWASH panelига kirish. Tasdiqlash uchun tugmani bosing.",
             reply_markup=kb,
         )
         return
     await update.message.reply_text(
-        "Это бот входа в панель Leadgram. Откройте панель в браузере и нажмите "
+        "Это бот входа в панель AUTOWASH. Откройте панель в браузере и нажмите "
         "«Войти через Telegram».\n\n"
-        "Bu Leadgram panelига kirish boti. Brauzerda panelni oching."
+        "Bu AUTOWASH panelига kirish boti. Brauzerda panelni oching."
     )
 
 
