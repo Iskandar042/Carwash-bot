@@ -1,5 +1,5 @@
 """
-Leadgram Car Wash Bot — CUSTOMER SIDE ONLY.
+AUTOWASH Car Wash Bot — CUSTOMER SIDE ONLY.
 
 Workers use the Telegram Mini App (worker_app.html).
 Admin uses the web dashboard (index.html).
@@ -52,9 +52,9 @@ async def cmd_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
             InlineKeyboardButton("✅ Войти / Kirish", callback_data=f"weblogin:{token}")
         ]])
         await update.message.reply_text(
-            "🔐 Вход в Leadgram в браузере.\n"
+            "🔐 Вход в AUTOWASH в браузере.\n"
             "Нажмите кнопку ниже, чтобы войти под своим аккаунтом.\n\n"
-            "Brauzerda Leadgram'ga kirish. Tasdiqlash uchun tugmani bosing.",
+            "Brauzerda AUTOWASH'ga kirish. Tasdiqlash uchun tugmani bosing.",
             reply_markup=kb,
         )
         return
@@ -93,8 +93,15 @@ async def handle_weblogin(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> Non
                 json={"p_token": token, "p_username": username, "p_tg_id": user.id},
             )
             ok = r.status_code == 200 and bool((r.json() or {}).get("ok"))
+            if not ok:
+                # Common causes: anon key instead of service_role (401/403),
+                # wrong SUPABASE_URL (404), or an expired/used token (ok=false).
+                logger.warning(
+                    "claim_web_login did not succeed: HTTP %s — %s",
+                    r.status_code, r.text[:300],
+                )
     except Exception as e:
-        logger.warning("claim_web_login failed: %s", e)
+        logger.warning("claim_web_login request failed: %s", e)
 
     if ok:
         await query.edit_message_text(
@@ -216,7 +223,7 @@ async def _send_pending_otps(context: ContextTypes.DEFAULT_TYPE) -> None:
                     await context.bot.send_message(
                         chat_id=tg_id,
                         text=(
-                            f"🔐 <b>Leadgram — код входа</b>\n\n"
+                            f"🔐 <b>AUTOWASH — код входа</b>\n\n"
                             f"Привет, {name}!\n\n"
                             f"Ваш одноразовый код:\n"
                             f"<code>{code}</code>\n\n"
