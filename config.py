@@ -4,9 +4,25 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BOT_TOKEN      = os.getenv("BOT_TOKEN", "")
-# NOTE: SUPABASE_URL must include /rest/v1, e.g.:
-#   https://xiwkqotyhcejzbeymovi.supabase.co/rest/v1
-SUPABASE_URL   = os.getenv("SUPABASE_URL", "https://xiwkqotyhcejzbeymovi.supabase.co/rest/v1")
+
+
+def _normalize_supabase_url(raw: str) -> str:
+    """
+    The bot talks to PostgREST, so the base URL must end with /rest/v1.
+    Accept either form in the env var (with or without /rest/v1, with or
+    without a trailing slash) so a misconfigured .env can't silently break
+    the Telegram web-login (claim_web_login) and OTP delivery.
+    """
+    url = (raw or "https://xiwkqotyhcejzbeymovi.supabase.co").strip().rstrip("/")
+    if not url.endswith("/rest/v1"):
+        url = url + "/rest/v1"
+    return url
+
+
+SUPABASE_URL   = _normalize_supabase_url(os.getenv("SUPABASE_URL", ""))
+# IMPORTANT: this MUST be the service_role key (Dashboard → Settings → API →
+# service_role). The anon key is NOT allowed to call claim_web_login, so the
+# "Войти через Telegram" button will silently fail with the anon key.
 SUPABASE_KEY   = os.getenv("SUPABASE_KEY", "")
 # Worker Mini App URL. Opened from @leadgram_carwash_bot both as a Telegram
 # Mini App and as a plain web link. Its domain is registered to that bot.
