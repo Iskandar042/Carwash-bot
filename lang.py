@@ -37,7 +37,7 @@ _S: dict[str, dict[str, str]] = {
         "lang_saved":  "🇷🇺 Язык: Русский",
         "welcome": (
             "👋 Привет, {name}!\n\n"
-            "🚗 <b>Leadgram — Автомойка</b>\n\n"
+            "🚗 <b>AUTOWASH — Автомойка</b>\n\n"
             "Выберите действие:"
         ),
         "help_text": (
@@ -154,7 +154,7 @@ _S: dict[str, dict[str, str]] = {
         "lang_saved":  "🇺🇿 Til: O'zbekcha",
         "welcome": (
             "👋 Salom, {name}!\n\n"
-            "🚗 <b>Leadgram — Avtomoyka</b>\n\n"
+            "🚗 <b>AUTOWASH — Avtomoyka</b>\n\n"
             "Amalni tanlang:"
         ),
         "help_text": (
