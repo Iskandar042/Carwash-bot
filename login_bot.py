@@ -9,7 +9,7 @@ lets the browser finish logging in.
 Run it ALONGSIDE your worker bot (bot.py), with the OWNER bot's token:
 
     # Windows PowerShell
-    $env:LOGIN_BOT_TOKEN="<@Leadgram_admin_bot token from BotFather>"
+    $env:LOGIN_BOT_TOKEN="8928989966:AAHZeSbUwMZge1KELBEQ-6sa13DaoZ4GsWc"
     python login_bot.py
 
     # Linux / macOS
