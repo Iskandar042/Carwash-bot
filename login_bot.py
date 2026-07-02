@@ -1,25 +1,13 @@
 """
-Standalone "Login via Telegram" backend for the OWNER bot (@Leadgram_admin_bot).
-
-The owner web panel opens  t.me/<owner_bot>?start=lg_<token> . This tiny bot
-handles that deep link: it shows a confirm button, and on tap it calls the
-Supabase RPC claim_web_login() with the user's real Telegram username, which
-lets the browser finish logging in.
-
-Run it ALONGSIDE your worker bot (bot.py), with the OWNER bot's token:
-
-    # Windows PowerShell
-    $env:LOGIN_BOT_TOKEN="8928989966:AAHZeSbUwMZge1KELBEQ-6sa13DaoZ4GsWc"
-    python login_bot.py
-
-    # Linux / macOS
-    LOGIN_BOT_TOKEN="<token>" python login_bot.py
-
-SUPABASE_URL / SUPABASE_KEY are read from the same .env / config as the main bot
-(SUPABASE_KEY must be the service_role key so claim_web_login is allowed).
+"Login via Telegram" backend for the OWNER bot (@Autowash_owner_bot).
+Deep link t.me/<owner_bot>?start=lg_<token> -> confirm button -> claim_web_login().
+On Render it also opens a tiny HTTP port so the Web Service deploy stays healthy.
+Env: LOGIN_BOT_TOKEN, SUPABASE_URL, SUPABASE_KEY (service_role / secret key).
 """
 import logging
 import os
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import httpx
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -33,6 +21,27 @@ logging.basicConfig(
 logger = logging.getLogger("login_bot")
 
 LOGIN_BOT_TOKEN = os.getenv("LOGIN_BOT_TOKEN", "")
+
+
+def _start_keep_alive_server() -> None:
+    """Render Web Services need an open HTTP port; this bot uses polling, so
+    bind $PORT with a tiny health endpoint to keep the deploy healthy."""
+    port = int(os.getenv("PORT", "10000"))
+
+    class _Ping(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"ok")
+
+        def log_message(self, *args):
+            pass
+
+    threading.Thread(
+        target=lambda: HTTPServer(("0.0.0.0", port), _Ping).serve_forever(),
+        daemon=True,
+    ).start()
+    logger.info("Keep-alive HTTP server listening on port %s", port)
 
 
 def _sb_headers() -> dict:
@@ -105,6 +114,7 @@ async def handle_weblogin(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> Non
 def main() -> None:
     if not LOGIN_BOT_TOKEN:
         raise RuntimeError("LOGIN_BOT_TOKEN is not set (the owner bot's token).")
+    _start_keep_alive_server()   # bind $PORT so Render's Web Service stays healthy
     app = Application.builder().token(LOGIN_BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CallbackQueryHandler(handle_weblogin, pattern="^weblogin:"))
